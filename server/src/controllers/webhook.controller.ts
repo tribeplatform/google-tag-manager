@@ -4,6 +4,8 @@ import { Types } from '@tribeplatform/gql-client';
 import { logger } from '@/utils/logger';
 
 const DEFAULT_SETTINGS = {}
+// GTM-XXXXXX for arbitrary amounts of X and Y
+const CONTAINER_ID_REGEX = /^(GTM-[A-Z0-9]+)$/
 
 class WebhookController {
   public index = async (req: Request, res: Response, next: NextFunction) => {
@@ -80,6 +82,19 @@ class WebhookController {
    * TODO: Elaborate on this function
    */
   private async updateSettings(input) {
+     if (!input.data.settings?.containerId) {
+      return {
+        type: input.type,
+        status: 'FAILED',
+        errorMessage: `Missing required parameter containerId.`,
+      }
+    } else if (!CONTAINER_ID_REGEX.test(input.data.settings?.containerId)) {
+      return {
+        type: input.type,
+        status: 'FAILED',
+        errorMessage: `Container ID is in an invalid format.`,
+      }
+    }
     return {
       type: input.type,
       status: 'SUCCEEDED',
